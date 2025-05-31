@@ -6,7 +6,7 @@ Write simple UI for your code in seconds in a unified way using Easy TTUI Menus
 
 ## Installation
 
-Run `pip3 install easyttuimenus` from your preferred environment.
+Run `pip install easyttuimenus` from your preferred environment.
 
 ## Usage
 

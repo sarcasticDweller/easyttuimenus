@@ -1,9 +1,11 @@
 # Easy TTUI Menus
 
 ## About
+
 Write simple UI for your code in seconds in a unified way using Easy TTUI Menus
 
 ## Installation
+
 Run `pip3 install easyttuimenus` from your preferred environment.
 
 ## Usage
@@ -15,13 +17,17 @@ Run `pip3 install easyttuimenus` from your preferred environment.
 Use when you have a list of possible valid options.
 
 #### Parameters
+
 `prompt`: Information to give to the user
+
 `opitons`: The list of options to select
 
 #### Returns
+
 An index from `options`
 
 #### Example Usage
+
 ```python
 import easyttuimenus
 prompt = "Pick one of these"
@@ -35,10 +41,14 @@ print(options[choice]) # selected item from options
 Use when you want to take an integer value as input.
 
 #### Parameters
+
 `prompt`: Information to give to the user
+
+
 `opitons`: A list containing a minimum and maximum value
 
 #### Returns
+
 An integer value
 
 #### Example Usage

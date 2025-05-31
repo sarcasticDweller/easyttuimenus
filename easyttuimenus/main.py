@@ -1,11 +1,6 @@
 from os import system, name
 
 def _display(prompt, options = None, mode = ""):
-    '''
-    Forgive me.
-
-    `options` is either a dictionary containing `int: value` pairs or a list containing a "min" and "max" value.
-    '''
     break_hard = "=============================="
     break_soft = "------------------------------"
     input_prompt = ":: "
@@ -42,6 +37,11 @@ def list_menu(prompt: str, options: list):
             return response
             
 def int_menu(prompt: str, options: list):
+    '''
+    :param prompt: Text to display to the user
+    :param options: A list containing two integers, representing "min" and "max" values
+    :return: An integer within "min" and "max"
+    '''
     while True:
         response = _display(prompt, options, mode = "int_mode")
         if isinstance(response, ValueError):

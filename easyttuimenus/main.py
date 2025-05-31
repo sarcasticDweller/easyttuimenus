@@ -43,7 +43,6 @@ def list_menu(prompt: str, options: list):
             prompt = prompt + f"\nResponse {response} is not in the available options. Please try another."
         else:
             return response
-
             
 def int_menu(prompt: str, options: list):
     while True:
@@ -54,13 +53,3 @@ def int_menu(prompt: str, options: list):
             prompt = prompt + f"\nResponse {response} was out of range. Please try another."
         else:
             return response
-
-
-
-def main():
-    test_options = ["yes", "no", "heck naw"]
-    print(test_options[list_menu("Pick one of these", test_options)])
-
-
-if __name__ == "__main__":
-    main()

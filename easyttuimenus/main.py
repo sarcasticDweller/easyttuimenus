@@ -1,5 +1,3 @@
-#!../venv/bin/python3
-# A unified input system
 from os import system, name
 
 def _display(prompt, options = None, mode = ""):
@@ -15,7 +13,7 @@ def _display(prompt, options = None, mode = ""):
 
     clear_screen
     print(f"{break_hard}\n{prompt}\n{break_soft}")
-    if mode == "dict_mode":
+    if mode == "list_mode":
         for i in range(len(options)):
             print(f"{i}: {options[i]}")
     elif mode == "int_mode":
@@ -34,12 +32,11 @@ def list_menu(prompt: str, options: list):
     :param options: List of every possible option, in a text format
     :return: An index within `options`
     '''
-    options_with_keys = {i: options[i] for i in range(len(options))}
     while True:
-        response = _display(prompt, options_with_keys, mode = "dict_mode")
+        response = _display(prompt, options, mode = "list_mode")
         if isinstance(response, ValueError):
             prompt = prompt + "\nPlease only enter number values."
-        elif not response in options_with_keys:
+        elif response > len(options) or response < 0:
             prompt = prompt + f"\nResponse {response} is not in the available options. Please try another."
         else:
             return response
@@ -53,3 +50,6 @@ def int_menu(prompt: str, options: list):
             prompt = prompt + f"\nResponse {response} was out of range. Please try another."
         else:
             return response
+    
+options = ["dingus", "dongus"]
+list_menu("", options)

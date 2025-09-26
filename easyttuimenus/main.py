@@ -51,5 +51,3 @@ def int_menu(prompt: str, options: list):
         else:
             return response
     
-options = ["dingus", "dongus"]
-list_menu("", options)

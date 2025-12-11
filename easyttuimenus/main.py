@@ -1,53 +1,72 @@
 from os import system, name
+from typing import Callable
 
-def _display(prompt, options = None, mode = ""):
+def _display(prompt: str, body_text: str) -> int | ValueError:
     break_hard = "=============================="
     break_soft = "------------------------------"
     input_prompt = ":: "
-    clear_screen = system("cls") if name == "nt" else system("clear")
-
-    clear_screen
-    print(f"{break_hard}\n{prompt}\n{break_soft}")
-    if mode == "list_mode":
-        for i in range(len(options)):
-            print(f"{i}: {options[i]}")
-    elif mode == "int_mode":
-        print(f"Enter a number between {options[0]} and {options[1]}")
-    else:
-        pass
-    print(break_hard)
+    system("cls") if name == "nt" else system("clear")
+    print(f"{break_hard}\n{prompt}\n{break_soft}\n{body_text}\n{break_hard}")
     try:
         return int(input(input_prompt))
-    except Exception as e:
+    except ValueError as e:
         return e
 
-def list_menu(prompt: str, options: list):
-    '''
-    :param prompt: Text to display to the user
-    :param options: List of every possible option, in a text format
-    :return: An index within `options`
-    '''
+def _menu(prompt: str, body_text: str, validate: Callable[[int], tuple[bool, str]]) -> tuple[int | None, BaseException | None]:
     while True:
-        response = _display(prompt, options, mode = "list_mode")
-        if isinstance(response, ValueError):
-            prompt = prompt + "\nPlease only enter number values."
-        elif response > len(options) or response < 0:
-            prompt = prompt + f"\nResponse {response} is not in the available options. Please try another."
-        else:
+        response = _display(prompt, body_text)
+        if response is ValueError:
+            prompt = f"{prompt}\nPlease only enter whole numbers"
+            continue
+        is_valid, err_mseg = validate(response)
+        if is_valid:
             return response
-            
-def int_menu(prompt: str, options: list):
-    '''
-    :param prompt: Text to display to the user
-    :param options: A list containing two integers, representing "min" and "max" values
-    :return: An integer within "min" and "max"
-    '''
+        else:
+            prompt = f"{prompt}\n{err_mseg}"
+
+def int_menu(prompt: str, min: int, max: int) -> int:
+    validate = lambda x: (
+        min <= x <= max,
+        f"Response is out of range. Please try again."
+    )
+    body_text = f"Please enter a number between {min} and {max}."
+    return _menu(prompt, body_text, validate)
+
+
+def list_menu(prompt: str, options: list[str]) -> int:
+    validate = lambda x: (
+        0 <= x < len(options),
+        f"Response is not in the available options. Please try another."
+    )
+    body_text = "\n".join([f"{i}: {options[i]}" for i in range(len(options))])
+    return _menu(prompt, body_text, validate)
+
+def multiple_choice_menu(prompt: str, options: list[str]) -> list[int]:
+    options.insert(0, "Done")
+    selected = []
     while True:
-        response = _display(prompt, options, mode = "int_mode")
-        if isinstance(response, ValueError):
-            prompt = prompt + "\nPlease only enter number values."
-        elif response < options[0] or response > options[1]:
-            prompt = prompt + f"\nResponse {response} was out of range. Please try another."
+        choice = list_menu(prompt, options)
+        if choice == 0:
+            return selected
+        if options[choice].startswith("* "):
+            options[choice] = options[choice][2:]
+            selected.remove(options[choice])
         else:
-            return response
+            options[choice] = f"* {options[choice]}"
+            selected.append(options[choice][2:])
+
+def _test():
+    options = ["Apple", "Banana", "Cherry", "Date"]
+    min_val = 1
+    max_val = 10
+    a = list_menu("Select a fruit from the list below:", options)
+    b = int_menu("Select a number from the range below:", min_val, max_val)
+    c = multiple_choice_menu("Select multiple fruits from the list below:", options)
+    print(a)
+    print(b)
+    print(c)
+
+if __name__ == "__main__":
+    _test()
+
     

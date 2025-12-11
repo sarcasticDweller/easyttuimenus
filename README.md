@@ -2,63 +2,18 @@
 
 ## About
 
-Write simple UI for your code in seconds in a unified way using Easy TTUI Menus
+Write simple UI for your code in seconds using Easy TTUI Menus
+
+## Changelog
+
+### 1.0.0
+
+- Started a changelog
+- Changes the function signature of `int_menu()`. It now takes a string and two integers instead of a string and a list containing two integers. Legacy systems should use version 0.1.5
+- Added `multiple_choice_menu()`
+- Removed "Usage" section of readme as I dread maintaining it
 
 ## Installation
 
 Run `pip install easyttuimenus` from your preferred environment.
-
-## Usage
-
-### List Menu
-
-`list_menu(prompt: str, options: list)`
-
-Use when you have a list of possible valid options.
-
-#### Parameters
-
-`prompt`: Information to give to the user
-
-`opitons`: The list of options to select
-
-#### Returns
-
-An index from `options`
-
-#### Example Usage
-
-```python
-import easyttuimenus
-prompt = "Pick one of these"
-options = ["lorem", "ipsum", "lorem ipsum"]
-choice = easyttuimenus.list_menu(prompt, options)
-print(options[choice]) # selected item from options
-```
-
-### Int Menu
-
-Use when you want to take an integer value as input.
-
-#### Parameters
-
-`prompt`: Information to give to the user
-
-
-`opitons`: A list containing a minimum and maximum value
-
-#### Returns
-
-An integer value
-
-#### Example Usage
-
-```python
-import easyttuimenus
-min_and_max = [0, 10]
-prompt = "Pick a value between 0 and 10"
-user_input = easyttuimenus.int_menu(prompt, min_and_max)
-print(user_input) # user selected number
-```
-
 

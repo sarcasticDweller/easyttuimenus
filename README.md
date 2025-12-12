@@ -6,6 +6,12 @@ Write simple UI for your code in seconds using Easy TTUI Menus
 
 ## Changelog
 
+### 1.0.2
+
+- Fixed issue where multiple_choice_menu() returns a list of strings instead of ints
+- Added stubs
+- More annotations
+
 ### 1.0.0
 
 - Started a changelog

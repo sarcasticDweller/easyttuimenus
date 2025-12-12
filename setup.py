@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="easyttuimenus",  
-    version="1.0.0",
+    version="1.0.2",
     description="Write simple UI for your code in seconds in a unified way using Easy TTUI Menus",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",

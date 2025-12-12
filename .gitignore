@@ -2,3 +2,4 @@ venv
 dist
 easyttuimenus.egg-info
 build
+__pycache__

@@ -12,20 +12,19 @@ def _display(prompt: str, body_text: str) -> int | ValueError:
     except ValueError as e:
         return e
 
-def _menu(prompt: str, body_text: str, validate: Callable[[int], tuple[bool, str]]) -> tuple[int | None, BaseException | None]:
+def _menu(prompt: str, body_text: str, validate: Callable[[int], tuple[bool, str]]) -> int:
     while True:
         response = _display(prompt, body_text)
-        if response is ValueError:
-            prompt = f"{prompt}\nPlease only enter whole numbers"
-            continue
-        is_valid, err_mseg = validate(response)
-        if is_valid:
-            return response
-        else:
+        if type(response) is int:
+            is_valid, err_mseg = validate(response)
+            if is_valid:
+                return response
             prompt = f"{prompt}\n{err_mseg}"
+        if type(response) is ValueError: 
+            prompt = f"{prompt}\nPlease only enter whole numbers"
 
 def int_menu(prompt: str, min: int, max: int) -> int:
-    validate = lambda x: (
+    validate: Callable[[int], tuple[bool, str]] = lambda x: (
         min <= x <= max,
         f"Response is out of range. Please try again."
     )
@@ -34,7 +33,7 @@ def int_menu(prompt: str, min: int, max: int) -> int:
 
 
 def list_menu(prompt: str, options: list[str]) -> int:
-    validate = lambda x: (
+    validate: Callable[[int], tuple[bool, str]] = lambda x: (
         0 <= x < len(options),
         f"Response is not in the available options. Please try another."
     )
@@ -43,17 +42,17 @@ def list_menu(prompt: str, options: list[str]) -> int:
 
 def multiple_choice_menu(prompt: str, options: list[str]) -> list[int]:
     options.insert(0, "Done")
-    selected = []
+    selected: list[int] = []
     while True:
         choice = list_menu(prompt, options)
         if choice == 0:
             return selected
         if options[choice].startswith("* "):
             options[choice] = options[choice][2:]
-            selected.remove(options[choice])
+            selected.remove(choice)
         else:
             options[choice] = f"* {options[choice]}"
-            selected.append(options[choice][2:])
+            selected.append(choice)
 
 def _test():
     options = ["Apple", "Banana", "Cherry", "Date"]

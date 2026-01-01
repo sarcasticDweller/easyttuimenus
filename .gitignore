@@ -3,4 +3,4 @@ dist
 easyttuimenus.egg-info
 build
 __pycache__
-out/
+out

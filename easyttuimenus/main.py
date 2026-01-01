@@ -1,14 +1,16 @@
 from os import system, name
 from typing import Callable, Any
 
+BREAK_HARD = "=============================="
+BREAK_SOFT = "------------------------------"
+INPUT_INDICATOR = ":: "
+SELECTED_INDICATOR = "* "
+
 def _display(prompt: str, body_text: str) -> int | ValueError:
-    break_hard = "=============================="
-    break_soft = "------------------------------"
-    input_prompt = ":: "
     system("cls") if name == "nt" else system("clear")
-    print(f"{break_hard}\n{prompt}\n{break_soft}\n{body_text}\n{break_hard}")
+    print(f"{BREAK_HARD}\n{prompt}\n{BREAK_SOFT}\n{body_text}\n{BREAK_HARD}")
     try:
-        return int(input(input_prompt))
+        return int(input(INPUT_INDICATOR))
     except ValueError as e:
         return e
 
@@ -31,7 +33,6 @@ def int_menu(prompt: str, min: int, max: int) -> int:
     body_text = f"Please enter a number between {min} and {max}."
     return _menu(prompt, body_text, validate)
 
-
 def list_menu(prompt: str, options: list[Any]) -> int:
     validate: Callable[[int], tuple[bool, str]] = lambda x: (
         0 <= x < len(options),
@@ -41,17 +42,16 @@ def list_menu(prompt: str, options: list[Any]) -> int:
     return _menu(prompt, body_text, validate)
 
 def multiple_choice_menu(prompt: str, options: list[str]) -> list[int]:
+    """A wrapper for `list_menu()` that adds multiple-choice support."""
     options.insert(0, "Done")
     selected: list[int] = []
     while True:
         choice = list_menu(prompt, options)
         if choice == 0:
             return selected
-        if options[choice].startswith("* "):
+        if options[choice].startswith(SELECTED_INDICATOR):
             options[choice] = options[choice][2:]
             selected.remove(choice)
         else:
-            options[choice] = f"* {options[choice]}"
+            options[choice] = f"{SELECTED_INDICATOR}{options[choice]}"
             selected.append(choice)
-
-    

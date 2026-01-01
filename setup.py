@@ -1,9 +1,10 @@
 from setuptools import setup, find_packages
 
+VERSION = "1.0.2"
 
 setup(
     name="easyttuimenus",  
-    version="1.0.2",
+    version=VERSION,
     description="Write simple UI for your code in seconds in a unified way using Easy TTUI Menus",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",

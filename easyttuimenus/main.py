@@ -1,5 +1,5 @@
 from os import system, name
-from typing import Callable
+from typing import Callable, Any
 
 def _display(prompt: str, body_text: str) -> int | ValueError:
     break_hard = "=============================="
@@ -32,7 +32,7 @@ def int_menu(prompt: str, min: int, max: int) -> int:
     return _menu(prompt, body_text, validate)
 
 
-def list_menu(prompt: str, options: list[str]) -> int:
+def list_menu(prompt: str, options: list[Any]) -> int:
     validate: Callable[[int], tuple[bool, str]] = lambda x: (
         0 <= x < len(options),
         f"Response is not in the available options. Please try another."
@@ -53,19 +53,5 @@ def multiple_choice_menu(prompt: str, options: list[str]) -> list[int]:
         else:
             options[choice] = f"* {options[choice]}"
             selected.append(choice)
-
-def _test():
-    options = ["Apple", "Banana", "Cherry", "Date"]
-    min_val = 1
-    max_val = 10
-    a = list_menu("Select a fruit from the list below:", options)
-    b = int_menu("Select a number from the range below:", min_val, max_val)
-    c = multiple_choice_menu("Select multiple fruits from the list below:", options)
-    print(a)
-    print(b)
-    print(c)
-
-if __name__ == "__main__":
-    _test()
 
     

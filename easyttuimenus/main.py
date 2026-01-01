@@ -1,10 +1,11 @@
 from os import system, name
-from typing import Callable, Any
+from typing import Callable, List, Any
 
 BREAK_HARD = "=============================="
 BREAK_SOFT = "------------------------------"
 INPUT_INDICATOR = ":: "
 SELECTED_INDICATOR = "* "
+TYPE_ERROR_MESSEGE: Callable[[List[Any]], str] = lambda options: f"All options must support string representation. Options passed: {options}"
 
 def _display(prompt: str, body_text: str) -> int | ValueError:
     system("cls") if name == "nt" else system("clear")
@@ -33,7 +34,7 @@ def int_menu(prompt: str, min: int, max: int) -> int:
     body_text = f"Please enter a number between {min} and {max}."
     return _menu(prompt, body_text, validate)
 
-def list_menu(prompt: str, options: list[Any]) -> int:
+def list_menu(prompt: str, options: List[Any]) -> int:
     validate: Callable[[int], tuple[bool, str]] = lambda x: (
         0 <= x < len(options),
         f"Response is not in the available options. Please try another."
@@ -41,8 +42,9 @@ def list_menu(prompt: str, options: list[Any]) -> int:
     body_text = "\n".join([f"{i}: {options[i]}" for i in range(len(options))])
     return _menu(prompt, body_text, validate)
 
-def multiple_choice_menu(prompt: str, options: list[str]) -> list[int]:
+def multiple_choice_menu(prompt: str, options: List[Any]) -> list[int]:
     """A wrapper for `list_menu()` that adds multiple-choice support."""
+    options = [str(o) for o in options]
     options.insert(0, "Done")
     selected: list[int] = []
     while True:

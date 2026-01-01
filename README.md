@@ -4,7 +4,17 @@
 
 Write simple UI for your code in seconds using Easy TTUI Menus
 
+## Roadmap (For when I get around to it)
+
+- Function name overhaul to make more sense (because `list_menu` really is just a multiple-choice selection...)
+
 ## Changelog
+
+### 1.0.3
+
+- Changed the typing hints on multiple_choice_menu() and list_menu() to support `Any` instead of just `str`
+- Added stub files
+- Added Roadmap header to README
 
 ### 1.0.2
 

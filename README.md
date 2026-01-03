@@ -1,5 +1,9 @@
 # Easy TTUI Menus
 
+## Installation
+
+Run `pip install easyttuimenus` from your preferred environment.
+
 ## About
 
 Write simple UI for your code in seconds using Easy TTUI Menus
@@ -29,7 +33,4 @@ Write simple UI for your code in seconds using Easy TTUI Menus
 - Added `multiple_choice_menu()`
 - Removed "Usage" section of readme as I dread maintaining it
 
-## Installation
-
-Run `pip install easyttuimenus` from your preferred environment.
 

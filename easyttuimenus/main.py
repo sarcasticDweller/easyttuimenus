@@ -1,15 +1,11 @@
-from os import system, name
-from typing import Callable, List, Any, Tuple
+from os import system, name, get_terminal_size
+from typing import List, Any, Tuple 
 
-# Constants for UI formatting
-BREAK_HARD = "=============================="
-BREAK_SOFT = "------------------------------"
-INPUT_INDICATOR = ":: "
-SELECTED_INDICATOR = "* "
-
-# Error message generator
-def type_error_message(options: List[Any]) -> str:
-    return f"All options must support string representation. Options passed: {options}"
+def get_terminal_columns():
+    try:
+        return get_terminal_size().columns
+    except OSError:
+        return 80 # nasty little fallback
 
 # Utility function to check if a value is an integer
 def is_int(value: Any) -> bool:
@@ -17,88 +13,123 @@ def is_int(value: Any) -> bool:
         int(value)
         return True
     except ValueError:
-        return False
+        return False 
 
 # Clear the console screen
 def clear_screen() -> None:
     system("cls") if name == "nt" else system("clear")
 
-# Display a prompt and get user input
-def _display_and_input(prompt: str, body_text: str) -> str:
-    clear_screen()
-    print(f"{BREAK_HARD}\n{prompt}\n{BREAK_SOFT}\n{body_text}\n{BREAK_HARD}")
-    try:
-        return input(INPUT_INDICATOR)
-    except KeyboardInterrupt:
-        print("\nInput interrupted by user.")
-        raise
-    except Exception as e:
-        print(f"An unexpected error occurred: {e}")
-        raise
+class Menu():
+    # ///////////////////////////////
+    # dynamic components
+    break_hard = "="
+    break_soft = "-"
+    # ///////////////////////////////
 
-# General menu handler with validation
-def menu(prompt: str, body_text: str, validate: Callable[[Any], Tuple[bool, str]]) -> Any:
-    while True:
-        response = _display_and_input(prompt, body_text)
-        is_valid, error_message = validate(response)
-        if is_valid:
-            return response
-        prompt = f"{prompt}\n{error_message}"
+    INPUT_INDICATOR = ":: "
 
-# Menu for selecting an integer within a range
-def int_menu(prompt: str, min_value: int, max_value: int) -> int:
-    if max_value <= min_value:
-        raise ValueError(f"max_valid ({max_value}) must be greater than min_value ({min_value})!")
+    # ///////////////////////////////
+    # other vars 
+    err_str: str
+    body_text: str
+    # ///////////////////////////////
 
-    def validate(response: str) -> Tuple[bool, str]:
-        if is_int(response):
-            value = int(response)
-            if min_value <= value <= max_value:
-                return True, ""
-        return False, f"Response is invalid. Please type an integer between {min_value} and {max_value}."
+    def __new__(cls, *args: Any, **kwargs: Any) -> Any:
+        pass
 
-    body_text = f"Please enter a number between {min_value} and {max_value}."
-    return int(menu(prompt, body_text, validate))
+    @classmethod
+    def validate(cls, value: Any) -> Tuple[bool, str]:
+        """Generic validator that always returns True"""
+        return True, "" 
+    
+    @classmethod
+    def refresh_dynamic_components(cls):
+        cls.break_hard = "=" * get_terminal_columns()
+        cls.break_soft = "-" * get_terminal_columns()
 
-# Menu for selecting an option from a list
-def list_menu(prompt: str, options: List[Any]) -> int:
-    if not options:
-        raise ValueError("Options cannot be empty!")
+    @classmethod
+    def display_and_input(cls, prompt: str, body_text: str) -> str:
+        clear_screen()
+        cls.refresh_dynamic_components()
+        print(f"{cls.break_hard}\n{prompt}\n{cls.break_soft}\n{body_text}\n{cls.break_hard}")
+        try:
+            return input(cls.INPUT_INDICATOR)
+        except KeyboardInterrupt:
+            print("\nInput interrupted by user.")
+            raise
+        except Exception as e:
+            print(f"An unexpected error occurred: {e}")
+            raise
 
-    def validate(response: str) -> Tuple[bool, str]:
-        if is_int(response):
-            index = int(response)
-            if 0 <= index < len(options):
-                return True, ""
-        return False, "Response is invalid. Please type a number corresponding to the option you wish to select."
+    @classmethod
+    def get_response(cls, prompt: str):
+        while True:
+            response = Menu.display_and_input(prompt, cls.body_text)
+            valid, err = cls.validate(response)
+            if valid:
+                return response
+            prompt = f"{prompt}\n{err}"
 
-    body_text = "\n".join([f"{i}: {option}" for i, option in enumerate(options)])
-    return int(menu(prompt, body_text, validate))
+class IntMenu(Menu):
 
-# Menu for multiple-choice selection
-def multiple_choice_menu(prompt: str, options: List[Any]) -> List[int]:
-    if not options:
-        raise ValueError("Options cannot be empty!")
+    # ///////////////////////////////
+    # validation variables
+    min_value: int = 0 # on the fence about keeping this default value
+    max_value: int 
+    err_str: str = "Response is invalid."
+    # ///////////////////////////////
 
-    options = [str(option) for option in options]
-    options.insert(0, "Done")
-    selected_indices: List[int] = []
+    def __new__(cls, prompt: str, min_value: int, max_value: int) -> int:
+        if max_value <= min_value:
+            raise ValueError(f"max_valid ({max_value}) must be greater than min_value ({min_value})!")
 
-    while True:
-        choice = list_menu(prompt, options)
-        if choice == 0:
-            return selected_indices
-        if options[choice].startswith(SELECTED_INDICATOR):
-            options[choice] = options[choice][len(SELECTED_INDICATOR):]
-            selected_indices.remove(choice)
-        else:
-            options[choice] = f"{SELECTED_INDICATOR}{options[choice]}"
-            selected_indices.append(choice)
+        cls.min_value = min_value
+        cls.max_value = max_value
+        cls.body_text = f"Please enter a number between {min_value} and {max_value}."
 
-# Menu for free-text response
-def text_response_menu(prompt: str) -> str:
-    def validate(response: str) -> Tuple[bool, str]:
-        return True, ""
+        return int(IntMenu.get_response(prompt))
 
+    # used by get_response
+    @classmethod
+    def validate(cls, response: str) -> Tuple[bool, str]:
+        valid = cls.min_value <= int(response) <= cls.max_value if is_int(response) else False
+        return valid, cls.err_str
+
+class MultipleChoiceMenu(IntMenu):
+    err_str = "Response is invalid. Please type a number corresponding to the option you wish to select."
+
+    def __new__(cls, prompt: str, options: List[Any]) -> int:
+        if not options:
+            raise ValueError("Options cannot be empty!")
+
+        cls.body_text = "\n".join([f"{i}: {option}" for i, option in enumerate(options)])
+        cls.max_value = len(options)
+
+        return int(MultipleChoiceMenu.get_response(prompt))
+
+class CheckboxMenu(MultipleChoiceMenu):
+    SELECTED_INDICATOR = "* "
+    def __new__(cls, prompt: str, options: List[Any]) -> List[int]:
+        if not options:
+            raise ValueError("Options cannot be empty!")
+
+        options = [str(option) for option in options]
+        options.insert(0, "Done")
+        selected_indices: List[int] = []
+
+        while True:
+            choice = MultipleChoiceMenu(prompt, options)
+            if choice == 0: # "Done" 
+                return selected_indices # gross behavior here: the "done" item offsets the value of all the selecte items... is this a bad feature? IDK. fixing it would mean that the actual returned value does not match what is displayed, so im on the fence about fixing this one
+            if options[choice].startswith(cls.SELECTED_INDICATOR): # then de-select it
+                options[choice] = options[choice][len(cls.SELECTED_INDICATOR):]
+                selected_indices.remove(choice)
+            else: # then select it
+                options[choice] = f"{cls.SELECTED_INDICATOR}{options[choice]}"
+                selected_indices.append(choice)
+
+class FreeformMenu(Menu):
     body_text = "Please type your response below."
-    return menu(prompt, body_text, validate)
+
+    def __new__(cls, prompt: str) -> str:
+        return FreeformMenu.get_response(prompt)

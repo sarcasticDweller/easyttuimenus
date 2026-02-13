@@ -1,5 +1,15 @@
 from os import system, name, get_terminal_size
 from typing import List, Any, Tuple 
+from enum import Enum
+
+class StaticAssets(Enum): # assets that dont change
+    unselected_box_char = "[ ]"
+    selected_box_char = "[x]"
+    input_indicator = ":: "
+
+class DynamicAssets(Enum): # assets that match the screen size
+    section_break_char = "="
+    subsection_break_char = "-"
 
 def get_terminal_columns():
     try:
@@ -22,8 +32,8 @@ def clear_screen() -> None:
 class Menu():
     # ///////////////////////////////
     # dynamic components
-    break_hard = "="
-    break_soft = "-"
+    break_hard: str
+    break_soft: str
     # ///////////////////////////////
 
     INPUT_INDICATOR = ":: "
@@ -44,8 +54,8 @@ class Menu():
     
     @classmethod
     def refresh_dynamic_components(cls):
-        cls.break_hard = "=" * get_terminal_columns()
-        cls.break_soft = "-" * get_terminal_columns()
+        cls.break_hard = DynamicAssets.section_break_char * get_terminal_columns()
+        cls.break_soft = DynamicAssets.subsection_break_char * get_terminal_columns()
 
     @classmethod
     def display_and_input(cls, prompt: str, body_text: str) -> str:
@@ -53,7 +63,7 @@ class Menu():
         cls.refresh_dynamic_components()
         print(f"{cls.break_hard}\n{prompt}\n{cls.break_soft}\n{body_text}\n{cls.break_hard}")
         try:
-            return input(cls.INPUT_INDICATOR)
+            return input(StaticAssets.input_indicator)
         except KeyboardInterrupt:
             print("\nInput interrupted by user.")
             raise
@@ -108,6 +118,7 @@ class MultipleChoiceMenu(IntMenu):
         return int(MultipleChoiceMenu.get_response(prompt))
 
 class CheckboxMenu(MultipleChoiceMenu):
+    # ill need to revisit this with my dynamic assets thingie 
     SELECTED_INDICATOR = "* "
     def __new__(cls, prompt: str, options: List[Any]) -> List[int]:
         if not options:

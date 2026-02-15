@@ -1,15 +1,7 @@
 from os import system, name, get_terminal_size
 from typing import List, Any, Tuple 
-from enum import Enum
+from constants import BREAK_HARD_CHAR, BREAK_SOFT_CHAR, INPUT_INDICATOR, CHECKBOX_EMPTY, CHECKBOX_FULL
 
-class StaticAssets(Enum): # assets that dont change
-    unselected_box_char = "[ ]"
-    selected_box_char = "[x]"
-    input_indicator = ":: "
-
-class DynamicAssets(Enum): # assets that match the screen size
-    section_break_char = "="
-    subsection_break_char = "-"
 
 def get_terminal_columns():
     try:
@@ -35,10 +27,6 @@ class Menu():
     break_hard: str
     break_soft: str
     # ///////////////////////////////
-
-    INPUT_INDICATOR = ":: "
-
-    # ///////////////////////////////
     # other vars 
     err_str: str
     body_text: str
@@ -48,14 +36,14 @@ class Menu():
         pass
 
     @classmethod
-    def validate(cls, value: Any) -> Tuple[bool, str]:
+    def validate(cls, response: Any) -> Tuple[bool, str]:
         """Generic validator that always returns True"""
         return True, "" 
     
     @classmethod
     def refresh_dynamic_components(cls):
-        cls.break_hard = DynamicAssets.section_break_char * get_terminal_columns()
-        cls.break_soft = DynamicAssets.subsection_break_char * get_terminal_columns()
+        cls.break_hard = BREAK_HARD_CHAR * get_terminal_columns()
+        cls.break_soft = BREAK_SOFT_CHAR * get_terminal_columns()
 
     @classmethod
     def display_and_input(cls, prompt: str, body_text: str) -> str:
@@ -63,7 +51,7 @@ class Menu():
         cls.refresh_dynamic_components()
         print(f"{cls.break_hard}\n{prompt}\n{cls.break_soft}\n{body_text}\n{cls.break_hard}")
         try:
-            return input(StaticAssets.input_indicator)
+            return input(INPUT_INDICATOR)
         except KeyboardInterrupt:
             print("\nInput interrupted by user.")
             raise
@@ -113,18 +101,17 @@ class MultipleChoiceMenu(IntMenu):
             raise ValueError("Options cannot be empty!")
 
         cls.body_text = "\n".join([f"{i}: {option}" for i, option in enumerate(options)])
-        cls.max_value = len(options)
+        cls.max_value = len(options) + 1 #validate uses <=
 
         return int(MultipleChoiceMenu.get_response(prompt))
 
 class CheckboxMenu(MultipleChoiceMenu):
     # ill need to revisit this with my dynamic assets thingie 
-    SELECTED_INDICATOR = "* "
     def __new__(cls, prompt: str, options: List[Any]) -> List[int]:
         if not options:
             raise ValueError("Options cannot be empty!")
 
-        options = [str(option) for option in options]
+        options = [CHECKBOX_EMPTY + str(option) for option in options]
         options.insert(0, "Done")
         selected_indices: List[int] = []
 
@@ -132,12 +119,14 @@ class CheckboxMenu(MultipleChoiceMenu):
             choice = MultipleChoiceMenu(prompt, options)
             if choice == 0: # "Done" 
                 return selected_indices # gross behavior here: the "done" item offsets the value of all the selecte items... is this a bad feature? IDK. fixing it would mean that the actual returned value does not match what is displayed, so im on the fence about fixing this one
-            if options[choice].startswith(cls.SELECTED_INDICATOR): # then de-select it
-                options[choice] = options[choice][len(cls.SELECTED_INDICATOR):]
-                selected_indices.remove(choice)
-            else: # then select it
-                options[choice] = f"{cls.SELECTED_INDICATOR}{options[choice]}"
+            if options[choice].startswith(CHECKBOX_EMPTY): # then select it
+                options[choice] = options[choice][len(CHECKBOX_EMPTY):]
+                options[choice] = f"{CHECKBOX_FULL}{options[choice]}"
                 selected_indices.append(choice)
+            elif options[choice].startswith(CHECKBOX_FULL): # then de-select it
+                options[choice] = options[choice][len(CHECKBOX_FULL):]
+                options[choice] = f"{CHECKBOX_EMPTY}{options[choice]}"
+                selected_indices.remove(choice)
 
 class FreeformMenu(Menu):
     body_text = "Please type your response below."

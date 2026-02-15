@@ -1,14 +1,5 @@
 from typing import Any, List
 
-BREAK_HARD: str
-BREAK_SOFT: str
-INPUT_INDICATOR: str
-SELECTED_INDICATOR: str
-
-def int_menu(prompt: str, min: int, max: int) -> int: ...
-def list_menu(prompt: str, options: list[Any]) -> int: ...
-def multiple_choice_menu(prompt: str, options: list[Any]) -> list[int]: ...
-
 class IntMenu:
     def __new__(cls, prompt: str, min_value: int, max_value: int) -> int: ...
 
